@@ -14,8 +14,7 @@ int intexp(const int base, int n)
 
 int parse(char* str)
 {
-    int num, i;
-    int len = strlen(str);
+    int num, i, len = strlen(str);
     
     for (i = 0; i < len; i++)
     {
