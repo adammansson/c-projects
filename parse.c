@@ -7,9 +7,7 @@ int intexp(const int base, int n)
     int i, p = 1;
 
     for (i = 1; i < n; i++)
-    {
         p *= base;
-    }
     return p;
 }
 
@@ -30,6 +28,9 @@ int parse(char* str)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 1)
+        return 1;
+    // Parse the input from the user. Expected input is something that represents an integer.
     printf("%i\n", parse(argv[1]));
     return 0;
 }
