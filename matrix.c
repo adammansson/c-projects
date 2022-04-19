@@ -48,41 +48,57 @@ int print_matrix(matrix *mtx)
     int i;
     for (i = 0; i < mtx->nrows * mtx->ncols; i++)
     {
-        printf("%i ", mtx->data[i]);
-        if (i % mtx->nrows == mtx->nrows - 1)
+        if (i != 0 && i % mtx->ncols == 0)
             printf("\n");
+        printf("%i ", mtx->data[i]);
     }
-    printf("\n");
+    printf("\n\n");
     return 0;
 }
 
 
-int add_matrices(matrix *m1, matrix *m2)
+int sum_matrices(matrix *mtx1, matrix *mtx2, matrix *sum)
 {
-    if (m1->nrows != m2->nrows || m1->ncols != m2->ncols)
+    if (mtx1->nrows != mtx2->nrows 
+        || mtx1->ncols != mtx2->ncols
+        || sum->nrows != mtx1->nrows
+        || sum->ncols != mtx1->ncols)
         return -1;
 
     int i;
-    for (i = 0; i < m1->nrows * m1->ncols; i++)
-        m1->data[i] += m2->data[i];
+    for (i = 0; i < mtx1->nrows * mtx1->ncols; i++)
+        sum->data[i] = mtx1->data[i] + mtx2->data[i];
     return 0;
 }
 
 
-int scale_matrix(matrix *mtx, int scaler)
+int transpose_matrix(matrix *in, matrix *out)
 {
-    if (!mtx) return -1;
+    if (!in || !out
+        || in->nrows != out->ncols
+        || in->ncols != out->nrows)
+        return -1;
 
     int i;
-    for (i = 0; i < mtx->nrows * mtx->ncols; i++)
-        mtx->data[i] *= scaler;
+    for (i = 0; i < in->nrows * in->ncols; i++)
+    {
+        //i / ncols is the row number, where as i % ncols is the column number
+        //by multiplying the row number by the number of columns and adding the the column number
+        //the index, i, is retrieved again
+        //if instead, the column number is multiplied by the number of rows the index of the element
+        //in the transposed matrix is retrieved.
+        
+        //out->data[(i % in->ncols)*out->ncols + i / in->ncols] = in->data[(i / in->ncols)*in->ncols + i % in->ncols];
+        out->data[(i % in->ncols)*in->nrows + i / in->ncols] = in->data[i];
+    }
     return 0;
 }
 
 
 int identity_matrix(matrix *mtx)
 {
-    if (!mtx || mtx->nrows != mtx->ncols) return -1;
+    if (!mtx || mtx->nrows != mtx->ncols)
+        return -1;
 
     int i;
     for (i = 0; i < mtx->nrows * mtx->ncols; i++)
@@ -91,6 +107,19 @@ int identity_matrix(matrix *mtx)
             mtx->data[i] = 1;
         else
             mtx->data[i] = 0;
+    }
+    return 0;
+}
+
+int index_matrix(matrix *mtx)
+{
+    if (!mtx)
+        return -1;
+
+    int i;
+    for (i = 0; i < mtx->nrows * mtx->ncols; i++)
+    {
+        mtx->data[i] = i;
     }
     return 0;
 }
@@ -110,34 +139,41 @@ int random_matrix(matrix *mtx)
 }
 
 
+int dot_product(matrix *vec1, matrix *vec2)
+{
+    if (!vec1 || !vec2
+        || vec1->nrows != 1
+        || vec2->ncols != 1)
+        return -1;
+
+    int i, result = 0;
+    for (i = 0; i < vec1->nrows * vec1->ncols; i++)
+    {
+        result += vec1->data[i] * vec2->data[i];
+    }
+    return result;
+}
+
+
 int main(void)
 {
     srand(time(NULL));
 
-    matrix *m1 = create_matrix(2, 2);
-    matrix *m2 = create_matrix(2, 2);
-    matrix *m3 = create_matrix(3, 3);
+    matrix *m1 = create_matrix(2, 3);
+    matrix *m2 = create_matrix(3, 2);
+    matrix *v1 = create_matrix(3, 1);
+    matrix *v2 = create_matrix(1, 3);
 
-    random_matrix(m1);
-    random_matrix(m2);
-    print_matrix(m1);
-    print_matrix(m2);
-
-    add_matrices(m1, m2);
-    print_matrix(m1);
-
-    scale_matrix(m1, 2);
-    print_matrix(m1);
-
-    identity_matrix(m2);
-    print_matrix(m2);
-
-    random_matrix(m3);
-    scale_matrix(m3, 9);
-    print_matrix(m3);
+    random_matrix(v1);
+    random_matrix(v2);
+    transpose_matrix(v1, v2);
+    print_matrix(v1);
+    print_matrix(v2);
+    printf("%i\n", dot_product(v1, v2));
 
     delete_matrix(m1);
     delete_matrix(m2);
-    delete_matrix(m3);
+    delete_matrix(v1);
+    delete_matrix(v2);
     return 0;
 }
